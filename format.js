@@ -31,8 +31,8 @@
      */
     BackAnalyze.prototype.backBig = function () {
         this.leftBigPos = this.data.indexOf("{");
-        if(this.leftBigPos > -1){
-            this.curBig += 1;
+        if(this.leftBigPos > -1 && this.data.indexOf("}") > this.leftBigPos){
+            this.curBig++;
             this.output = this.output + this.data.slice(0,this.leftBigPos + 1) + os.EOL + this.repeatString("\t",this.curBig);
             this.data = this.data.slice(this.leftBigPos + 1);
         }
@@ -40,13 +40,18 @@
         /** 当前仅当在一对{} 中间没有其他的{  执行此函数 */
         this.rightBigPos = this.data.indexOf("}");
         if(this.rightBigPos > -1 && this.data.indexOf("{") > this.rightBigPos ){
-            this.curBig -= 1;
+            --this.curBig;
+            this.output = this.output + this.data.slice(0,this.rightBigPos) + os.EOL + this.repeatString("\t",this.curBig) + "}" + os.EOL + this.repeatString("\t",this.curBig);
+            this.data = this.data.slice(this.rightBigPos + 1);
+        }else if(this.data.indexOf("{") == -1 && this.rightBigPos > -1 ){
+            --this.curBig;
             this.output = this.output + this.data.slice(0,this.rightBigPos) + os.EOL + this.repeatString("\t",this.curBig) + "}" + os.EOL + this.repeatString("\t",this.curBig);
             this.data = this.data.slice(this.rightBigPos + 1);
         }
-
-        if(this.leftBigPos > -1 && this.rightBigPos > -1){
+        if(this.data.indexOf("}") > -1){
             this.backBig();
+        }else{
+            this.output += this.data;
         }
     }
 
