@@ -20,8 +20,7 @@
         this.leftBigPos = 0; // 当前左大括号的位置
         this.isfirstLeftBig = true; //前一个左大括号的位置
         this.rightBigPos = 0; // 当前右大括号的位置
-        this.curLeftMiddle = 0; // 当前的左中括号的个数
-        this.curRightMiddle = 0; // 当前的右中括号的个数
+        this.speicalBigSemicolon = /([\}])(\s)*(;)/gm; //特殊分号 位于中括号和大括号之后的
         this.data = data;
         this.output = ''; // 输出内容
         this.option = Object.assign({delMComment:true,delSComment:true,addSemicolon:false,compress:true}, option || {})
@@ -56,10 +55,10 @@
     }
 
     /**
-     * @desc 添加空行在;后面
+     * @desc 添加空行在非}之后的;后面
      */
     BackAnalyze.prototype.addBlankLine = function (string,number) {
-       this.output = this.output.replace(/;/g,";" + os.EOL)
+        this.output = this.output.replace(this.speicalBigSemicolon,"$1$3"+os.EOL+"$2")
     }
 
     /**
@@ -80,6 +79,7 @@
 
     BackAnalyze.prototype.format = function () {
         this.backBig();
+        this.addBlankLine();
         return this.output
     }
 
