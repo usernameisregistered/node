@@ -2,5 +2,5 @@
 - author usernameisregistered
 - email 2986264813@qq.com
 
-Analyze.js 是js的压缩功能的实现 
-format.js 是js的反压缩功能的实现
++ Analyze.js 是js的压缩功能的实现 
++ format.js 是js的反压缩功能的实现
