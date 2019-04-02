@@ -4,3 +4,4 @@
 
 + Analyze.js 是js的压缩功能的实现 
 + format.js 是js的反压缩功能的实现
++ rely.js 动态加载js
