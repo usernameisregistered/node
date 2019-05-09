@@ -3,7 +3,7 @@
  * @param {number} m 
  * @param {number} n 
  * @returns {number}
- * @description 欧几里得算法求最大公约数
+ * @description辗转相除法求最大公约数
  */
 Number.gcd = function(m,n){
     if(m == n){
