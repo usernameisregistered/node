@@ -52,14 +52,14 @@ Number.gcd = function (m, n) {
             if (m % i == 0) {
                 mPrimeFactor.push(i);
                 m /= i;
-                i = 1;
+                i = i - 1;
             }
         }
         for (var i = 2; i <= n; i++) {
             if (n % i == 0) {
                 nPrimeFactor.push(i);
                 n /= i;
-                i = 1;
+                i = i - 1;
             }
         }
         if(mPrimeFactor.length < nPrimeFactor.length){
