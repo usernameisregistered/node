@@ -12,7 +12,8 @@ function getData(tpl){
     var styleResult = comilerSpecialElement(tpl,"style");    
     tpl = revertSpecialElement(tpl,"script",scriptResult.result);
     tpl = revertSpecialElement(tpl,"style",styleResult.result);
-    document.body.innerHTML = revertContent(tpl,data);
+    getScriptFragment(tpl,'if',data);
+    //document.body.innerHTML = revertContent(tpl,data);
 }
 getData(document.body.innerHTML);
 /**
@@ -45,6 +46,28 @@ function revertSpecialElement(tpl,tagname,revertObj){
     return tpl;
 }
 
+function getScriptFragment(tpl,keyword,data){
+    var reg = new RegExp("{{\\s*"+keyword+"\\s*(\\S+)\\s*}}([\\s\\S]*?){{\\s*"+keyword+"end\\s*}}");
+    console.log(reg)
+    var result= reg.exec(tpl);
+    if(data[result[1].trim()]){
+        console.log(1111)
+    }
+}
+
+function revertKeyword(tpl){
+    var regIf = /{{\s*(if)\s*(\S+)\s*}}/;
+    var regEIf = /{{\s*(\S+)\s*(\S+)\s*(\S+)\s*}}/
+    var regElse = /{{\s*(\S+)\s*}}/;
+    if(regIf.test(tpl)){
+        console.log(regIf.exec(tpl))
+    }
+    // while(regIf.test(tpl)){
+    //    
+    // }
+}
+
+
 /**
  * 
  * @param {DocumentFragment} tpl
@@ -61,14 +84,5 @@ function revertContent(tpl,data){
             return data[$1.trim()]
         });
     }
-    /** 
-        var arr = [],result =null;
-        while(result = tagReg.exec(tpl)){
-            arr.push({"name":result[0],"value":data[result[1].trim()]})
-        }
-        for(var i = 0; i< arr.length;i++){
-            tpl = tpl.replace(arr[i].name,arr[i].value)
-        }
-    */
     return tpl;
 }
