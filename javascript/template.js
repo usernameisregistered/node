@@ -1,12 +1,12 @@
 function getData(tpl){
     var data = {};
     data["title"] = 'fasdfasf';
+    data["color"] = 'red';
     data["list"] = [
         {title: '标题1', desc: '描述1'},
         {title: '标题2', desc: '描述2'},
         {title: '标题3', desc: '描述3'},
     ]
-    console.log(tpl)
     var scriptResult = comilerSpecialElement(tpl,"script");
     tpl = scriptResult.tpl;
     var styleResult = comilerSpecialElement(tpl,"style");    
@@ -52,8 +52,23 @@ function revertSpecialElement(tpl,tagname,revertObj){
  * @returns {DocumentFragment} 
  */
 function revertContent(tpl,data){
-    var tagReg = /{{([\s\S]*?)}}/g;
-    return tpl.replace(tagReg,function(match,$1){
-        return data[$1.trim()]
-    })
+    var tagReg = /{{([\s\S]*?)}}/;
+    var result;
+    var arr = [];
+    while(tagReg.test(tpl)){
+        var result = tagReg.exec(tpl);
+        tpl = tpl.replace(tagReg,function(match,$1){
+            return data[$1.trim()]
+        });
+    }
+    /** 
+        var arr = [],result =null;
+        while(result = tagReg.exec(tpl)){
+            arr.push({"name":result[0],"value":data[result[1].trim()]})
+        }
+        for(var i = 0; i< arr.length;i++){
+            tpl = tpl.replace(arr[i].name,arr[i].value)
+        }
+    */
+    return tpl;
 }
