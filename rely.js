@@ -6,6 +6,7 @@
     var relyjs = global.relyjs = {
         version: "1.2.0"
     }
+    var doc = document;
     var event = relyjs.event = {};
     var cache = relyjs.cache = {};
     var data = relyjs.data = {
@@ -29,13 +30,13 @@
             return;
         }
         var node = doc.createElement("script");
-        var doc = document;
         var head = doc.head || doc.getElementsByTagName("head")[0] || doc.documentElement;
         var baseElement = head.getElementsByTagName("base")[0];
         if (charset) {
             node.charset = charset
         }
-        if (!isUndefined(crossorigin)) {
+    
+        if (!isType("Undefined",crossorigin)) {
             node.setAttribute("crossorigin", crossorigin)
         }
         node.async = true
@@ -55,7 +56,7 @@
                     bakConfig[k] = currConfig[k]
                 }
             } else {
-                if (isArray(bakConfig)) {
+                if (isType("Array",bakConfig)) {
                     currConfig = bakConfig.concat(currConfig)
                 } else if (key === "basepath") {
                     if (currConfig.slice(-1) !== "/") {
