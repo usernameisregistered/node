@@ -1,5 +1,4 @@
 /**
- * 
  * @param {number} m 
  * @param {number} n 
  * @returns {number}
@@ -18,6 +17,7 @@ Number.gcd = function(m,n){
         return n
     }
 }
+
 /**
  * 
  * @param {number} m 
@@ -36,6 +36,18 @@ Number.gcd = function(m,n){
         return min;
     }
 }
+Number.primeFactor = function (num) {
+    var result = [];
+    var i = 2;
+    for (i = 2; i <= num; i++) {
+        if (num % i == 0) {
+            result.push(i);
+            num /= i;
+            i--;
+        }
+    }
+    return result
+}
 /**
  * 
  * @param {number} m 
@@ -43,36 +55,51 @@ Number.gcd = function(m,n){
  * @returns {number}
  * @description 分解质因数求最大公约数
  */
-Number.gcd = function (m, n) {
-    if (m == n) {
-        throw new Error("Please enter two unequal numbers")
-    } else {
-        var mPrimeFactor = [], nPrimeFactor = [];
-        for (var i = 2; i <= m; i++) {
-            if (m % i == 0) {
-                mPrimeFactor.push(i);
-                m /= i;
-                i = i - 1;
-            }
-        }
-        for (var i = 2; i <= n; i++) {
-            if (n % i == 0) {
-                nPrimeFactor.push(i);
-                n /= i;
-                i = i - 1;
-            }
-        }
-        if(mPrimeFactor.length < nPrimeFactor.length){
-            return  mPrimeFactor.filter(v=>nPrimeFactor.includes(v)).reduce((accumulator, currentValue)=>{
-                return accumulator *= currentValue;
-            });
-        }else{
-            return  nPrimeFactor.filter(v=>mPrimeFactor.includes(v)).reduce((accumulator, currentValue)=>{
-                return accumulator *= currentValue;
-            });
-        }        
+Number.gcd = function () {
+    var factors = [];
+    for (var value of arguments) {
+        factors.push(Number.primeFactor(value))
     }
+    /**
+     * 统计质因数出现的个数
+     */
+    var list = [];
+    for (var value of factors) {
+        var obj = {};
+        for (var item of value) {
+            if (obj[item]) {
+                obj[item] = obj[item] + 1
+            } else {
+                obj[item] = 1;
+            }
+        }
+        list.push(obj)
+    }
+    /**
+     * 获取公共质因数出现的最少次数
+     */
+    var result = list[0];
+    for (var i = 1; i < list.length; i++) {
+        for (var item in list[i]) {
+            if (result[item] && result[item] > list[i][item]) {
+                result[item] = list[i][item]
+            } else if (!result[item]) {
+                result[item] = list[i][item]
+            }
+        }
+    }
+    var commonElement = new Set(factors[0].filter((element) => {
+        return factors.slice(1).every(list => {
+            return list.indexOf(element) > -1
+        })
+    }))
+    var number = 1;
+    commonElement.forEach(element => {
+        number = number * Math.pow(element, result[element])
+    })
+    return number;
 }
+
 /**
  * 
  * @param {number} m 
