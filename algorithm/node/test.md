@@ -38,17 +38,17 @@
 
 > 已知两个正整数的和为667,它们的最大公约数与最小公倍数之比为1：120求这两个数.
 
-  function test(number1,number2){
-    var result = [];
-    for (var m = 2; m < Math.ceil(number1 / 2); m ++) {
-        if (Number.gcd(m, number1 - m) * number2 == Number.mcm(m, number1 - m) ) {
-            result.push([m, number1 - m])
+    function test(number1,number2){
+        var result = [];
+        for (var m = 2; m < Math.ceil(number1 / 2); m ++) {
+            if (Number.gcd(m, number1 - m) * number2 == Number.mcm(m, number1 - m) ) {
+                result.push([m, number1 - m])
+            }
         }
+        return result;
     }
-    return result;
-  }
-  test(667,120)
-  
+    test(667,120)
+
 > [ [115, 552],[232, 435]] 
 
 --------------------------------------------------------------------
