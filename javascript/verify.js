@@ -1,11 +1,11 @@
 (function (global) {
     var Verify = global.Verify = function () {
-        this.version = "1.0.0",
-            this.allowClassifys = {
-                "0": [1, 2, 3, 4],
-                "1": [1, 2, 3],
-                "2": [1, 2]
-            }
+        this.version = "1.0.0";
+        this.allowClassifys = {
+            "1": [1, 2, 3, 4],
+            "2": [1, 2, 3],
+            "3": [1, 2]
+        }
         this.config = {
 
         }
@@ -31,7 +31,6 @@
     Verify.prototype = {
         init: function (config) {
             this.config = Object.assign(this.config, config);
-            console.log(this.config)
             switch (this.config.type) {
                 case 1:
                     this.ordinaryVerify();
@@ -47,8 +46,11 @@
             }
         },
         ordinaryVerify: function () {
-            generateCode.apply(this);
-            console.log("普通验证码")
+            for(var i = 0 ; i < 20 ; i++){
+                console.log("验证码："+generateCode.apply(this));
+            }
+            
+            //console.log("普通验证码")
         },
         mathVerify: function () {
             console.log("算数验证码")
@@ -70,36 +72,52 @@
         return canvas;
     }
     /**
+     * @description 根据最大值和最小值生成随机一个随机数
+     * @param {Number} min
+     * @param {Number} max 
+     * @returns {Number}
+     */
+    function generateRandom(min,max){
+        return String(min + Math.ceil(Math.random() * (max - min) ))
+    }
+
+    /**
      * 生成所需要的Code
      */
     function generateCode() {
-        var code = null;
-        if (this.allowClassifys[this.config.type + ""].indexOf(this.config.classify) > -1) {
-            switch (this.config.type) {
+        var code = '';
+        var config = this.config;
+        if (this.allowClassifys[config.type + ""].indexOf(config.classify) > -1) {
+            switch (config.type) {
                 case 1:
-                    switch (this.config.type) {
+                    switch (config.classify) {
                         case 1:
-                            for (var i = 0; i < this.config.size; i++) {
-                                code += Math.random().slice(4, 1)
+                            for (var i = 0; i < config.size; i++) {
+                                code += generateRandom(0,9)
                             }
                             return code;
                         case 2:
-                            for (var i = 0; i < this.config.size; i++) {
-                                var number = Math.random().toString().slice(4, 6) * 1;
-                                code +=  ( number % 16 > 9 ? number % 16 :16 - number ).toString().toLowerCase()
+                            for (var i = 0; i < config.size; i++) {
+                                code += String.fromCharCode(generateRandom(66,90))
                             }
                             return code;
-                            break;
                         case 3:
-
-                            break;
+                            for (var i = 0; i < config.size; i++) {
+                                if(Math.random() > 0.5){
+                                    code += String.fromCharCode(generateRandom(66,90))
+                                }else{
+                                    code += generateRandom(0,9)
+                                } 
+                            }
+                            return code;
                         case 4:
-
-                            break;
+                            for (var i = 0; i < config.size -2 ; i++) {
+                                code += String.fromCharCode(generateRandom(20112,40869))
+                            }
+                            return code;
                     }
-                    break;
                 case 2:
-                    switch (this.config.type) {
+                    switch (config.type) {
                         case 1:
 
                             break;
@@ -112,7 +130,7 @@
                     }
                     break;
                 case 3:
-                    switch (this.config.type) {
+                    switch (config.type) {
                         case 1:
 
                             break;
@@ -126,7 +144,7 @@
                     break;
             }
         } else {
-            console.error("Non-existent authentication code classify, processable value:" + this.allowClassifys[this.config.type + ""].join(","))
+            console.error("Non-existent authentication code classify, processable value:" + this.allowClassifys[config.type + ""].join(","))
         }
     }
 })(window)
