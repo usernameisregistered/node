@@ -1,8 +1,8 @@
 /**
  * js文件压缩
  * @author liming
- * @version 1.0.2
- * @desc 本版本根据导出文件的信息以及要处理的文件的文件信息自动化了流程 下一个版本压缩函数不正确 重写压缩函数
+ * @version 1.0.4
+ * @desc 本版本根据导出文件的信息以及要处理的文件的文件信息自动化了流程 下一个版本添加分号函数不正确 重写添加分号函数
  */
 
  /**
@@ -26,11 +26,11 @@
      * @description 对js文件进行删除注释和删除多余空行以及添加函数末尾的分号以及对文件进行压缩
      */
     function Analyze(option) {
-        this.option = Object.assign({delMComment:true,delSComment:true,addSemicolon:true,compress:true}, option || {});
+        this.option = Object.assign({delMComment:true,delSComment:true,addSemicolon:false,compress:true}, option || {});
         this.reg_multi_comment = /\s*\/\*[\s\S]*?\*\//gm; //多行注释正则匹配
-        this.reg_single_comment = /\s*\/\/[\t \S]*/g;//单行注释正则匹配
+        this.reg_single_comment = /\s*\/\/[.\.]*(?:\r)(\n)$/g;//单行注释正则匹配
         this.reg_blank_line = /(\n|\r\n){1,}/g; //空行正则匹配
-        this.end_semicolon = /\s+([^;])\s*}/g;
+        this.end_semicolon = /\s+([^;])\s*}/g; // 添加分号
         this.solidity = /(\n|\r\n|\t| {2,})*/g;  
         this.getInputFile();
         this.createDir();              
