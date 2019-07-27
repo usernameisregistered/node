@@ -6,4 +6,5 @@
 + format.js 是js的反压缩功能的实现
 + rely.js 动态加载js
 + proto.js 原生方法的扩展和兼容形容处理
++ compressImage.js canvas图片压缩
 

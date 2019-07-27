@@ -26,11 +26,11 @@
      * @description 对js文件进行删除注释和删除多余空行以及添加函数末尾的分号以及对文件进行压缩
      */
     function Analyze(option) {
-        this.option = Object.assign({delMComment:true,delSComment:true,addSemicolon:false,compress:true}, option || {});
+        this.option = Object.assign({delMComment:true,delSComment:true,addSemicolon:true,compress:true}, option || {});
         this.reg_multi_comment = /\s*\/\*[\s\S]*?\*\//gm; //多行注释正则匹配
         this.reg_single_comment = /\s*\/\/[.\.]*(?:\r)(\n)$/g;//单行注释正则匹配
         this.reg_blank_line = /(\n|\r\n){1,}/g; //空行正则匹配
-        this.end_semicolon = /\s+([^;])\s*}/g; // 添加分号
+        this.end_semicolon = /;$/g; // 添加分号
         this.solidity = /(\n|\r\n|\t| {2,})*/g;  
         this.getInputFile();
         this.createDir();              
@@ -128,7 +128,11 @@
      * 函数末尾没有分号添加;
      */
     Analyze.prototype.addSemicolon = function () {
-        this.data = this.data.replace(this.end_semicolon, function (match, p1) { return match.replace(p1, p1 + ';') });
+        let result;
+        while((result =  this.end_semicolon.exec(this.data)) !== null ){
+            console.log(result)
+        }
+        // this.data = this.data.replace(this.end_semicolon, function (match, p1) { return match.replace(p1, p1 + ';') });
         return this
     }
 

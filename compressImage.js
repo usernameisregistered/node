@@ -15,6 +15,9 @@
      * 三 根据指定的缩放比例进行裁剪 
      * 四 根据指定的缩放比例进行缩放 图片大小可能会变大 比较图片的分辨率
      * 
+     * 
+     * 图片base64编码后的大小关系为 base64编码后的字节长度除8乘6 大致等于 文件的实际大小位数
+     * Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。 如果剩下的字符不足3个字节，则用0填充，输出字符使用’=’，因此编码后输出的文本末尾可能会出现1或2个’=’ 
      * @params {File} file 
      * @params {Object} config 
      * @author liming
@@ -70,7 +73,7 @@
         this.file = file;
         this.reader = new FileReader();
         this.img = new Image();
-        this.canvas = document.getElementById("canvas");
+        this.canvas = document.createElement("canvas");
         this.context = this.canvas.getContext("2d");
         this.imageData = '';
         this.getImageInfo();
@@ -81,7 +84,7 @@
             this.reader.addEventListener("load", () => {
                 this.img.src = this.reader.result;
                 this.imageData = this.reader.result;
-                this.file.size = this.imageData.length ;
+                this.file.size = this.imageData.length * 6 / 8 ;
                 this.img.addEventListener('load', () => {
                     switch(this.config.type + ''){
                         case "1":
@@ -116,7 +119,7 @@
             switch (this.config.type + '') {
                 case '1':
                     this.context.drawImage(this.img, 0, 0, this.config.ohterConfig.width, this.config.ohterConfig.height);
-                    this.config.ohterConfig.scompressratee = this.file.size > this.config.ohterConfig.size ?this.config.ohterConfig.size / this.file.size : 1;
+                    this.config.ohterConfig.scompressratee = this.file.size > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.file.size : 1;
                     this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.scompressratee * 1);
                     if(this.config.suffix == "image/png"){
                         console.warn("png格式的图片目前不支持清晰度压缩")
