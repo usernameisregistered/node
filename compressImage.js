@@ -18,6 +18,7 @@
      * 
      * 图片base64编码后的大小关系为 base64编码后的字节长度除8乘6 大致等于 文件的实际大小位数
      * Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。 如果剩下的字符不足3个字节，则用0填充，输出字符使用’=’，因此编码后输出的文本末尾可能会出现1或2个’=’ 
+     * 因为计算方式存在大概7%大小的误差 压缩的图片99%小于指定的大小
      * @params {File} file 
      * @params {Object} config 
      * @author liming
@@ -39,6 +40,9 @@
                 zoomFactor: [zfactor,yfactor] 缩放比例 类型为3,4 参数有效
                 compressratee：number > 0 && < 1 压缩比 类型为1 参数有效 
                 size:number|string 要压缩的最大字节数 类型为1 参数有效 
+            },
+            complete：function(){ //图片压缩完成以后
+
             }
         }
     */
@@ -48,15 +52,18 @@
             units: 'bit',
             suffixList: ['image/png', 'image/webp','image/jpeg'],
             suffix: 'image/jpeg', 
-            type: 4,
+            type: 1,
             ohterConfig: {
                 width: '400',
                 height: '400',
                 zoomFactor: [0.4,0.4],
                 compressratee: 0.92,
                 offset:[100,100],
-                size: '200kb'
-            }
+                size: '20kb'
+            },
+            complete:function (data) {
+
+              }
         }
         for (let key in config) {
             if (key != 'ohterConfig') {
@@ -66,9 +73,6 @@
                     this.config['ohterConfig'][item] = config['ohterConfig'][item]
                 }
             }
-        }
-        if (this.config.type == 1) {
-            this.convSize();
         }
         this.file = file;
         this.reader = new FileReader();
@@ -84,7 +88,9 @@
             this.reader.addEventListener("load", () => {
                 this.img.src = this.reader.result;
                 this.imageData = this.reader.result;
-                this.file.size = this.imageData.length * 6 / 8 ;
+                if (this.config.type == 1) {
+                    this.convSize();
+                }
                 this.img.addEventListener('load', () => {
                     switch(this.config.type + ''){
                         case "1":
@@ -115,12 +121,16 @@
         },
         /**绘制图片*/
         drawImage() {  
+            console.log(this)
             this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
             switch (this.config.type + '') {
                 case '1':
                     this.context.drawImage(this.img, 0, 0, this.config.ohterConfig.width, this.config.ohterConfig.height);
-                    this.config.ohterConfig.scompressratee = this.file.size > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.file.size : 1;
-                    this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.scompressratee * 1);
+                    this.config.ohterConfig.scompressratee = this.imageData.length > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.imageData.length : 1;
+                    console.log(this.config.ohterConfig.scompressratee)
+                    if(this.config.ohterConfig.scompressratee != 1){
+                        this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.scompressratee.toFixed(2) * 0.92);
+                    }
                     if(this.config.suffix == "image/png"){
                         console.warn("png格式的图片目前不支持清晰度压缩")
                     }
@@ -137,7 +147,8 @@
                     this.context.drawImage(this.img, 0,0, this.img.naturalWidth, this.img.naturalHeight,0,0,this.canvas.width,this.canvas.height);
                     this.imageData = this.canvas.toDataURL(this.config.suffix,1);
                     break;
-            }           
+            }
+            this.config.complete(this.imageData);         
         },
 
         /**
@@ -152,22 +163,31 @@
             if (this.config.unitsList.indexOf(units) > -1) {
                 switch (units) {
                     case 'bit':
-                        this.config.ohterConfig.size = size;
+                        this.config.ohterConfig.size = size * 6 / 8 - this.config.suffix.length - this.countChar("=");
                         break;
                     case 'kb':
-                        this.config.ohterConfig.size = size * 1024;
+                        this.config.ohterConfig.size = size * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=");
                         break;
                     case 'mb':
-                        this.config.ohterConfig.size = size * 1024 * 1024;
+                        this.config.ohterConfig.size = size * 1024 * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=");
                         break;
                     case 'gb':
-                        this.config.ohterConfig.size = size * 1024 * 1024 * 1024;
+                        this.config.ohterConfig.size = size * 1024 * 1024 * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=") ;
                         break;
                 }
             } else {
                 throw new Error("转换单位不被允许")
             }
         },
+        countChar(char){
+            let size = 0;
+            for (let i=0; i< this.imageData.length; i++){
+                if(this.imageData[i] == char){
+                    size++
+                }
+            }
+            return size;
+        }
     }
     return compressImage;
 }));
