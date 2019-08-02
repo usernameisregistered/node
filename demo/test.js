@@ -1,4 +1,4 @@
-const Analyze = require('./Analyze.js').Analyze;
+const Analyze = require('../Analyze.js').Analyze;
 
 config ={
     outputDir:'./test/dist',

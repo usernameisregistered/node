@@ -81,7 +81,6 @@
         this.context = this.canvas.getContext("2d");
         this.imageData = '';
         this.getImageInfo();
-        this.blob = '';
     };
     compressImage.prototype = {
         getImageInfo() {
@@ -127,7 +126,6 @@
                 case '1':
                     this.context.drawImage(this.img, 0, 0, this.config.ohterConfig.width, this.config.ohterConfig.height);
                     this.config.ohterConfig.scompressratee = this.imageData.length > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.imageData.length : 1;
-                    console.log(this.config.ohterConfig.scompressratee)
                     if(this.config.ohterConfig.scompressratee != 1){
                         this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.scompressratee.toFixed(2) * 0.92);
                     }

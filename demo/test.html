@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form>
+      <textarea></textarea>
+    </form>
+    <script>
+      const form = document.querySelector("form");
+      const textarea = document.querySelector("textarea");
+      const eventAwesome = new CustomEvent("awesome", {
+        bubbles: true,
+        detail: { text: () => textarea.value }
+      });
+      form.addEventListener("awesome", e => console.log(e.detail.text()));
+
+      textarea.addEventListener("input", e =>
+        e.target.dispatchEvent(eventAwesome)
+      );
+    </script>
+  </body>
+</html>
