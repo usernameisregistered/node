@@ -16,12 +16,13 @@ type 验证码类型
        height:'',// number 高度
        type:'',// enum 验证码类型
        offset:['',''] // array<number> 偏移值
-       category:'' //string [canvas,img] 参数不为3 是可选 为3时只能canvas
        otherConfig：{ // obj 其他配置
             size:'', // number  字符长度 默认为4  type=1 有效
-            interferon:'',// enum ['none','simple','complex']  干扰素 type=1 有效  
-            classify:'',// number | string  enum [1,2,3,4]  type=1 有效,
-            ingoreCase:true, 是否忽略大小写  
+            interferon:'',// enum ['none','simple','complex']  干扰素 type=1,2 有效  
+            classify:'',// number | string  enum [1,2,3,4]  type=1,2 有效,
+            ingoreCase:true, 是否忽略大小写  type=1 有效,
+            category:'' //string [canvas,img] 参数不为3 是可选 为3时只能canvas,
+            random:0.2 //随机偏移因子
        }  
     }
 ```
