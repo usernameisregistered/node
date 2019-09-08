@@ -39,6 +39,7 @@
                 compressratee：number > 0 && < 1 压缩比 类型为1 参数有效
                 maxCompressratee:0.8 允许最大的压缩比例 当超过一定的比例后对图片的尺寸进行缩放 不建议小于0.8
                 size:number|string 要压缩的最大字节数 类型为1 参数有效 
+                colorDepth:'',
             },
             complete：function(){ //图片压缩完成以后
 
@@ -47,8 +48,8 @@
     */
     function compressImage(file, config) {
         this.config = {
-            unitsList: ['bit', 'kb', 'mb', 'gb'],
-            units: 'bit',
+            unitsList: ['byte', 'kb', 'mb', 'gb'],
+            units: 'byte',
             suffixList: ['image/png', 'image/webp','image/jpeg'],
             suffix: 'image/jpeg', 
             type: 1,
@@ -58,10 +59,10 @@
                 height: '400',
                 zoomFactor: [0.4,0.4],
                 compressratee:'',
+                maxCompressratee:0.92,
                 colorDepth:24,
-                maxCompressratee:0.8,
                 offset:[100,100],
-                size: '400kb'
+                size:'400kb'
             },
             complete:function (data,blob) {
 
@@ -87,39 +88,40 @@
     };
     compressImage.prototype = {
         getImageInfo(){
-            this.reader.addEventListener("load", () => {
-                this.img.src = this.reader.result;
-                this.imageData = this.reader.result;
-                if (this.config.type == 1) {
-                    this.convSize();
+            let self = this;
+            self.reader.addEventListener("load", () => {
+                self.img.src = self.reader.result;
+                self.imageData = self.reader.result;
+                if (self.config.type == 1) {
+                    self.convSize();
                 }
-                this.img.addEventListener('load', () => {
-                    switch(this.config.type + ''){
+                self.img.addEventListener('load', () => {
+                    switch(self.config.type + ''){
                         case "1":
-                            this.canvas.width = this.config.ohterConfig.width = this.img.naturalWidth;
-                            this.canvas.height= this.config.ohterConfig.height = this.img.naturalHeight;
+                            self.canvas.width = self.config.ohterConfig.width = self.img.naturalWidth;
+                            self.canvas.height= self.config.ohterConfig.height = self.img.naturalHeight;
                             break;
                         case "2":
-                            this.canvas.width = this.config.ohterConfig.width; 
-                            this.canvas.height = this.config.ohterConfig.height;
+                            self.canvas.width = self.config.ohterConfig.width; 
+                            self.canvas.height = self.config.ohterConfig.height;
                             break; 
                         case "3":
-                            this.canvas.width = this.config.ohterConfig.width  = (this.img.naturalWidth - this.config.ohterConfig.offset[0] ) * this.config.ohterConfig.zoomFactor[0]; 
-                            this.canvas.height = this.config.ohterConfig.height = (this.img.naturalHeight - this.config.ohterConfig.offset[1] ) * this.config.ohterConfig.zoomFactor[1];
+                            self.canvas.width = self.config.ohterConfig.width  = (self.img.naturalWidth - self.config.ohterConfig.offset[0] ) * self.config.ohterConfig.zoomFactor[0]; 
+                            self.canvas.height = self.config.ohterConfig.height = (self.img.naturalHeight - self.config.ohterConfig.offset[1] ) * self.config.ohterConfig.zoomFactor[1];
                             break; 
                         case "4":
-                            this.canvas.width = this.config.ohterConfig.width  = this.img.naturalWidth * this.config.ohterConfig.zoomFactor[0];
-                            this.canvas.height = this.config.ohterConfig.height = this.img.naturalHeight * this.config.ohterConfig.zoomFactor[1];
+                            self.canvas.width = self.config.ohterConfig.width  = self.img.naturalWidth * self.config.ohterConfig.zoomFactor[0];
+                            self.canvas.height = self.config.ohterConfig.height = self.img.naturalHeight * self.config.ohterConfig.zoomFactor[1];
 
                     }
-                    this.drawImage();
+                    self.drawImage();
                 }, {
                     once: true
                 })
             },  {
                 once: true
             });
-            this.reader.readAsDataURL(this.file)
+            self.reader.readAsDataURL(self.file)
         },
         /**绘制图片*/
         drawImage() {  
@@ -133,10 +135,10 @@
                     this.config.ohterConfig.compressratee = this.file.size > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.file.size : 1;
                     if(this.config.ohterConfig.compressratee < this.config.ohterConfig.maxCompressratee){
                         console.warn("压缩比例超过当前允许的最大压缩率对图片进行缩放")
-                        let scale = this.img.naturalWidth * this.img.naturalHeight / 8 / this.config.ohterConfig.size / this.config.ohterConfig.colorDepth / this.config.ohterConfig.maxCompressratee
-                        this.canvas.width = this.config.ohterConfig.width = this.img.naturalWidth / Math.sqrt(scale);
-                        this.canvas.height= this.config.ohterConfig.height = this.img.naturalHeight / Math.sqrt(scale);
-                        console.log(this.canvas)
+                        let ratio = this.img.naturalWidth / this.img.naturalHeight 
+                        
+                        this.canvas.width = this.config.ohterConfig.width = Math.sqrt(this.config.ohterConfig.size / ratio);
+                        this.canvas.height= this.config.ohterConfig.height = this.canvas.width / ratio;
                         this.context.drawImage(this.img,0,0, this.img.naturalWidth, this.img.naturalHeight,0,0,this.canvas.width,this.canvas.height);
                         this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.maxCompressratee * 1);     
                     }else{
@@ -173,11 +175,11 @@
             let units = this.config.ohterConfig.size.match(/\D*$/)[0];
             if (this.config.unitsList.indexOf(units) > -1) {
                 switch (units) {
-                    case 'bit':
+                    case 'byte':
                         this.config.ohterConfig.size = size;
                         break;
                     case 'kb':
-                        this.config.ohterConfig.size = size * 8;
+                        this.config.ohterConfig.size = size * 1024;
                         break;
                     case 'mb':
                         this.config.ohterConfig.size = size * 1024 * 8;
