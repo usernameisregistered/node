@@ -10,15 +10,13 @@
 }(this, function () {
     /**
      * @description 图片压缩 
-     * 一 根据指定的大小对图片压缩（不改变图像的宽度修改文件的清晰度） canvas目前仅支持对后缀为jpeg的图片进行压缩
+     * 一 根据指定的文件大小对图片压缩
      * 二 根据给定的宽度或者高度裁剪 
      * 三 根据指定的缩放比例进行裁剪 
      * 四 根据指定的缩放比例进行缩放 图片大小可能会变大 比较图片的分辨率
      * 
      * 
-     * 图片base64编码后的大小关系为 base64编码后的字节长度除8乘6 大致等于 文件的实际大小位数
-     * Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。 如果剩下的字符不足3个字节，则用0填充，输出字符使用’=’，因此编码后输出的文本末尾可能会出现1或2个’=’ 
-     * 因为计算方式存在大概7%大小的误差 压缩的图片99%小于指定的大小
+     * 图片的大小为 宽*高 * 位深  单位为字节
      * @params {File} file 
      * @params {Object} config 
      * @author liming
@@ -29,16 +27,17 @@
         config={
             unitsList:['bit', 'kb', 'mb', 'gb'] 允许的文件大小的单位
             units: 'bit', 默认的文件大小单位
-            suffixList:['image/png','image/webp','image/jpeg'],
-                允许转换的图片的格式 不建议修改 Chrome支持“image/webp”类型 压缩后的图片统一后缀为jpeg png格式不支持清晰度压缩
+            suffixList:['image/png','image/webp','image/jpeg'], 允许转换的图片的格式 不建议修改 Chrome支持“image/webp”类型 压缩后的图片统一后缀为jpeg png格式不支持清晰度压缩
             suffix:'image/jpeg', 默认的图片格式 不建议修改
             type: 1|2|3|4 图片的压缩方式 默认是一
+            isConvFile:false 是否转换为blob,
             ohterConfig:{
                 width:'', 压缩后的图片宽度 类型为2 参数有效
                 height:'',压缩后图片高度 类型为2 参数有效
                 offset:['xoffset','yoffset'] 先裁剪后进行其他的图片裁剪的偏移值 类型为2,3 参数有效
                 zoomFactor: [zfactor,yfactor] 缩放比例 类型为3,4 参数有效
-                compressratee：number > 0 && < 1 压缩比 类型为1 参数有效 
+                compressratee：number > 0 && < 1 压缩比 类型为1 参数有效
+                maxCompressratee:0.8 允许最大的压缩比例 当超过一定的比例后对图片的尺寸进行缩放 不建议小于0.8
                 size:number|string 要压缩的最大字节数 类型为1 参数有效 
             },
             complete：function(){ //图片压缩完成以后
@@ -53,17 +52,20 @@
             suffixList: ['image/png', 'image/webp','image/jpeg'],
             suffix: 'image/jpeg', 
             type: 1,
+            isConvFile:true,
             ohterConfig: {
                 width: '400',
                 height: '400',
                 zoomFactor: [0.4,0.4],
-                compressratee: 0.92,
+                compressratee:'',
+                colorDepth:24,
+                maxCompressratee:0.8,
                 offset:[100,100],
-                size: '20kb'
+                size: '400kb'
             },
-            complete:function (data) {
+            complete:function (data,blob) {
 
-              }
+            }
         }
         for (let key in config) {
             if (key != 'ohterConfig') {
@@ -74,6 +76,7 @@
                 }
             }
         }
+        this.blob ='',
         this.file = file;
         this.reader = new FileReader();
         this.img = new Image();
@@ -83,7 +86,7 @@
         this.getImageInfo();
     };
     compressImage.prototype = {
-        getImageInfo() {
+        getImageInfo(){
             this.reader.addEventListener("load", () => {
                 this.img.src = this.reader.result;
                 this.imageData = this.reader.result;
@@ -120,18 +123,25 @@
         },
         /**绘制图片*/
         drawImage() {  
-            console.log(this)
             this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
             switch (this.config.type + '') {
                 case '1':
                     this.context.drawImage(this.img, 0, 0, this.config.ohterConfig.width, this.config.ohterConfig.height);
-                    this.config.ohterConfig.scompressratee = this.imageData.length > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.imageData.length : 1;
-                    if(this.config.ohterConfig.scompressratee != 1){
-                        this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.scompressratee.toFixed(2) * 0.92);
-                    }
                     if(this.config.suffix == "image/png"){
                         console.warn("png格式的图片目前不支持清晰度压缩")
                     }
+                    this.config.ohterConfig.compressratee = this.file.size > this.config.ohterConfig.size ? this.config.ohterConfig.size / this.file.size : 1;
+                    if(this.config.ohterConfig.compressratee < this.config.ohterConfig.maxCompressratee){
+                        console.warn("压缩比例超过当前允许的最大压缩率对图片进行缩放")
+                        let scale = this.img.naturalWidth * this.img.naturalHeight / 8 / this.config.ohterConfig.size / this.config.ohterConfig.colorDepth / this.config.ohterConfig.maxCompressratee
+                        this.canvas.width = this.config.ohterConfig.width = this.img.naturalWidth / Math.sqrt(scale);
+                        this.canvas.height= this.config.ohterConfig.height = this.img.naturalHeight / Math.sqrt(scale);
+                        console.log(this.canvas)
+                        this.context.drawImage(this.img,0,0, this.img.naturalWidth, this.img.naturalHeight,0,0,this.canvas.width,this.canvas.height);
+                        this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.maxCompressratee * 1);     
+                    }else{
+                        this.imageData = this.canvas.toDataURL(this.config.suffix,this.config.ohterConfig.compressratee * 1);      
+                    }       
                     break;
                 case "2":
                     this.context.drawImage(this.img,this.config.ohterConfig.offset[0],this.config.ohterConfig.offset[1], this.config.ohterConfig.width, this.config.ohterConfig.height,0,0,this.canvas.width,this.canvas.height);
@@ -146,7 +156,10 @@
                     this.imageData = this.canvas.toDataURL(this.config.suffix,1);
                     break;
             }
-            this.config.complete(this.imageData);         
+            if(this.config.isConvFile){
+                this.dataURItoBlob(this.imageData,this.blob); 
+            }
+            this.config.complete(this.imageData,this.blob);         
         },
 
         /**
@@ -161,31 +174,33 @@
             if (this.config.unitsList.indexOf(units) > -1) {
                 switch (units) {
                     case 'bit':
-                        this.config.ohterConfig.size = size * 6 / 8 - this.config.suffix.length - this.countChar("=");
+                        this.config.ohterConfig.size = size;
                         break;
                     case 'kb':
-                        this.config.ohterConfig.size = size * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=");
+                        this.config.ohterConfig.size = size * 8;
                         break;
                     case 'mb':
-                        this.config.ohterConfig.size = size * 1024 * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=");
+                        this.config.ohterConfig.size = size * 1024 * 8;
                         break;
                     case 'gb':
-                        this.config.ohterConfig.size = size * 1024 * 1024 * 1024 * 6 / 8 - this.config.suffix.length - this.countChar("=") ;
+                        this.config.ohterConfig.size = size * 1024 * 1024 * 8;
                         break;
                 }
             } else {
                 throw new Error("转换单位不被允许")
             }
         },
-        countChar(char){
-            let size = 0;
-            for (let i=0; i< this.imageData.length; i++){
-                if(this.imageData[i] == char){
-                    size++
-                }
+        dataURItoBlob () {
+            let arr = this.imageData.split(',')
+            let mime = arr[0].match(/:(.*?);/)[1]
+            let bstr = atob(arr[1])
+            let n = bstr.length
+            let u8arr = new Uint8Array(n)
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n)
             }
-            return size;
-        }
+            this.blob = new File([u8arr], this.file.name, { type: mime });
+        },
     }
     return compressImage;
 }));

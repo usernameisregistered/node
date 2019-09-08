@@ -21,7 +21,8 @@
         function selectFile(self){
 
             var compres = new window.compressImage(self.files[0],{
-                complete:function(data){
+                complete:function(data,blob){
+                    console.log(blob)
                     document.getElementById("img").src = data
                 }
             })
